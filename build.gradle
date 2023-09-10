@@ -1,0 +1,58 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.15'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'com.github.node-gradle.node' version "3.0.1"
+}
+
+group = 'com.hst'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+	gradlePluginPortal()
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:2021.0.6"
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// Frontend 빌드 설정
+node {
+	version = 'v18.15.0'
+	download = false
+	nodeProjectDir = file('${projectDir}/frontend')
+}
+
+task cleanFrontend(type: Delete) {
+	delete 'src/main/resources/static/static', 'src/main/resources/static/index.html', '${projectDir}/frontend/node_modules'
+}
+
+task npmBuild(type: NpmTask, dependsOn: ['cleanFrontend', 'npmInstall']) {
+	args = ["run", "build"]
+}
+
+task buildFrontend(type: Copy) {
+	from '${projectDir}/frontend'
+	into '${projectDir}/src/main/resources/static'
+}
+
+// compileJava.dependsOn npmBuild
