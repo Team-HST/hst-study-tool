@@ -37,22 +37,23 @@ tasks.named('test') {
 
 // Frontend 빌드 설정
 node {
-	version = 'v18.15.0'
-	download = false
-	nodeProjectDir = file('${projectDir}/frontend')
+//	version = '18.15.0'
+//	npmVersion = '9.5.0'
+//	download = false
+// npmDownload = false
+	nodeProjectDir = file("${projectDir}/frontend")
 }
 
 task cleanFrontend(type: Delete) {
-	delete 'src/main/resources/static/static', 'src/main/resources/static/index.html', '${projectDir}/frontend/node_modules'
+	delete 'src/main/resources/static', "${projectDir}/frontend/node_modules"
+}
+
+task buildFrontend(type: NpmTask, dependsOn: ['npmInstall']) {
+	args = ["run", "build"]
 }
 
 task npmBuild(type: NpmTask, dependsOn: ['cleanFrontend', 'npmInstall']) {
 	args = ["run", "build"]
-}
-
-task buildFrontend(type: Copy) {
-	from '${projectDir}/frontend'
-	into '${projectDir}/src/main/resources/static'
 }
 
 // compileJava.dependsOn npmBuild
